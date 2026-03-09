@@ -98,8 +98,6 @@ async function uploadZip() {
 
     const response = await axios.post(`${API_URL}/upload`, formData);
 
-    console.log("response", response);
-
     successMessage.value = `Upload concluído. Arquivo salvo com sucesso em: ${response.data.file.path}`;
     selectedFiles.value = [];
 
