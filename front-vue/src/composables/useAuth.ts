@@ -1,6 +1,7 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { friendlyError } from "../utils/errors";
 
 export function useAuth() {
   const user = ref<User | null>(null);
@@ -17,29 +18,37 @@ export function useAuth() {
     message.value = "";
     loading.value = true;
     try {
-      const result =
-        mode.value === "login"
-          ? await supabase.auth.signInWithPassword({
-              email: email.value,
-              password: password.value,
-            })
-          : await supabase.auth.signUp({
-              email: email.value,
-              password: password.value,
-            });
-      if (result.error) throw result.error;
-      if (mode.value === "signup" && !result.data.session) {
-        message.value =
-          "Cadastro realizado. Verifique seu e-mail para confirmar a conta.";
-        mode.value = "login";
-        return;
+      if (mode.value === "login") {
+        const result = await supabase.auth.signInWithPassword({
+          email: email.value,
+          password: password.value,
+        });
+        if (result.error) throw result.error;
+        user.value = result.data.user;
+      } else {
+        const result = await supabase.auth.signUp({
+          email: email.value,
+          password: password.value,
+        });
+        if (result.error) throw result.error;
+
+        if (result.data.session) {
+          user.value = result.data.user;
+        } else {
+          // Fallback para projetos que não retornam a sessão imediatamente.
+          const login = await supabase.auth.signInWithPassword({
+            email: email.value,
+            password: password.value,
+          });
+          if (login.error) throw login.error;
+          user.value = login.data.user;
+        }
       }
-      user.value = result.data.user;
+
       email.value = "";
       password.value = "";
     } catch (cause) {
-      error.value =
-        cause instanceof Error ? cause.message : "Não foi possível autenticar.";
+      error.value = friendlyError(cause, "Não foi possível concluir a autenticação.");
     } finally {
       loading.value = false;
     }

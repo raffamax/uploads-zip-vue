@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import JSZip from "jszip";
 import { storageBucket, supabase } from "../lib/supabase";
 import type { UploadedFile } from "../types/upload";
+import { friendlyError } from "../utils/errors";
 const props = defineProps<{ file: UploadedFile | null }>();
 const emit = defineEmits<{ close: [] }>();
 const entries = ref<JSZip.JSZipObject[]>([]);
@@ -43,8 +44,7 @@ watch(
       const zip = await JSZip.loadAsync(await response.blob());
       entries.value = Object.values(zip.files).filter((entry) => !entry.dir);
     } catch (cause) {
-      error.value =
-        cause instanceof Error ? cause.message : "Erro ao carregar a prévia.";
+      error.value = friendlyError(cause, "Não foi possível carregar a prévia do arquivo.");
     } finally {
       loading.value = false;
     }
@@ -124,6 +124,8 @@ async function selectEntry(entry: JSZip.JSZipObject) {
         new Blob([await entry.async("arraybuffer")], { type: mime[extension] }),
       );
     }
+  } catch (cause) {
+    error.value = friendlyError(cause, "Não foi possível abrir este arquivo na prévia.");
   } finally {
     entryLoading.value = null;
   }

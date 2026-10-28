@@ -2,6 +2,7 @@ import { computed, ref, watch, type Ref } from "vue";
 import dayjs from "dayjs";
 import { storageBucket, supabase } from "../lib/supabase";
 import { createZip } from "../utils/files";
+import { friendlyError } from "../utils/errors";
 import type { UploadedFile } from "../types/upload";
 
 export function useStorageFiles(
@@ -109,10 +110,7 @@ export function useStorageFiles(
       clearSelectedFiles();
       await fetchFiles();
     } catch (cause) {
-      errorMessage.value =
-        cause instanceof Error
-          ? cause.message
-          : "Erro ao enviar o arquivo ZIP.";
+      errorMessage.value = friendlyError(cause, "Não foi possível enviar os arquivos. Tente novamente.");
     } finally {
       loadingUpload.value = false;
     }
