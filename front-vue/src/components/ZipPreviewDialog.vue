@@ -44,7 +44,10 @@ watch(
       const zip = await JSZip.loadAsync(await response.blob());
       entries.value = Object.values(zip.files).filter((entry) => !entry.dir);
     } catch (cause) {
-      error.value = friendlyError(cause, "Não foi possível carregar a prévia do arquivo.");
+      error.value = friendlyError(
+        cause,
+        "Não foi possível carregar a prévia do arquivo.",
+      );
     } finally {
       loading.value = false;
     }
@@ -125,7 +128,10 @@ async function selectEntry(entry: JSZip.JSZipObject) {
       );
     }
   } catch (cause) {
-    error.value = friendlyError(cause, "Não foi possível abrir este arquivo na prévia.");
+    error.value = friendlyError(
+      cause,
+      "Não foi possível abrir este arquivo na prévia.",
+    );
   } finally {
     entryLoading.value = null;
   }
@@ -137,9 +143,17 @@ async function selectEntry(entry: JSZip.JSZipObject) {
       <div class="header-row">
         <div>
           <h2>Prévia do arquivo</h2>
-          <p>{{ file.name }}</p>
+          <p class="preview-file-name" :title="file.name">{{ file.name }}</p>
         </div>
-        <button class="secondary" @click="close">Fechar</button>
+        <button
+          class="close-button"
+          type="button"
+          aria-label="Fechar prévia"
+          title="Fechar"
+          @click="close"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
       <p v-if="loading">Carregando conteúdo do ZIP...</p>
       <p v-else-if="error" class="error">{{ error }}</p>

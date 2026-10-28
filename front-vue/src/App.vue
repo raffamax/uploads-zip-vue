@@ -43,11 +43,11 @@ const files = useStorageFiles(
   computed(() => auth.user.value?.id),
   notify,
 );
-function confirmDelete() {
+async function confirmDelete() {
   if (!pendingDeletePath.value) return;
   const path = pendingDeletePath.value;
-  closeNotice();
-  files.deleteFile(path);
+  const deleted = await files.deleteFile(path);
+  if (deleted) closeNotice();
 }
 </script>
 
@@ -99,6 +99,7 @@ function confirmDelete() {
     <ZipPreviewDialog :file="previewFile" @close="previewFile = null" />
     <NoticeDialog
       :notice="notice"
+      :loading="files.deletingPath.value !== null"
       @close="closeNotice"
       @confirm="confirmDelete"
     />

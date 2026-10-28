@@ -110,7 +110,10 @@ export function useStorageFiles(
       clearSelectedFiles();
       await fetchFiles();
     } catch (cause) {
-      errorMessage.value = friendlyError(cause, "Não foi possível enviar os arquivos. Tente novamente.");
+      errorMessage.value = friendlyError(
+        cause,
+        "Não foi possível enviar os arquivos. Tente novamente.",
+      );
     } finally {
       loadingUpload.value = false;
     }
@@ -121,7 +124,7 @@ export function useStorageFiles(
     try {
       const { data, error } = await supabase.storage
         .from(storageBucket)
-        .createSignedUrl(path, 300);
+        .createSignedUrl(path, 300, { download: true });
       if (error) throw error;
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (cause) {
@@ -142,9 +145,11 @@ export function useStorageFiles(
         (file) => file.path !== path,
       );
       notify("Sucesso", "Arquivo excluído com sucesso", "success");
+      return true;
     } catch (cause) {
       console.error(cause);
       notify("Erro", "Erro ao excluir arquivo", "error");
+      return false;
     } finally {
       deletingPath.value = null;
     }

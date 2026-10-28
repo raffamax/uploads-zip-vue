@@ -27,19 +27,12 @@ const emit = defineEmits<{
     <p v-if="loading">Carregando arquivos...</p>
     <p v-else-if="!files.length">Nenhum arquivo encontrado.</p>
     <ul v-else class="file-list">
-      <li
-        v-for="file in files"
-        :key="file.path"
-        class="file-item clickable"
-        tabindex="0"
-        @click="emit('preview', file)"
-        @keydown.enter="emit('preview', file)"
-      >
+      <li v-for="file in files" :key="file.path" class="file-item">
         <div class="file-heading">
           <span class="zip-icon" aria-hidden="true">ZIP</span>
           <div class="file-title">
             <strong>{{ file.name }}</strong
-            ><span class="file-hint">Clique para abrir a prévia</span>
+            ><span class="file-hint">Use uma das ações abaixo</span>
           </div>
         </div>
         <div class="file-details">
@@ -55,6 +48,9 @@ const emit = defineEmits<{
         </div>
         <div class="file-path" :title="file.path">{{ file.path }}</div>
         <div class="actions">
+          <button class="secondary" @click="emit('preview', file)">
+            Visualizar
+          </button>
           <button
             class="primary"
             :disabled="openingPath === file.path"
@@ -65,9 +61,7 @@ const emit = defineEmits<{
               class="spinner"
               aria-hidden="true"
             ></span
-            >{{
-              openingPath === file.path ? "Abrindo..." : "Visualizar / Baixar"
-            }}</button
+            >{{ openingPath === file.path ? "Baixando..." : "Baixar" }}</button
           ><button
             class="danger"
             :disabled="deletingPath === file.path"
